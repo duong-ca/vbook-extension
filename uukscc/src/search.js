@@ -6,7 +6,14 @@ function execute(key, page) {
     // Xử lý key rỗng
     if (!key || key.trim() === '') return null;
 
-    let url = `${BASE_URL}search/${encodeURIComponent(key)}_${page}.html`;
+    // Xây dựng URL tìm kiếm đúng định dạng
+    let url;
+    if (page === '1') {
+        url = `${BASE_URL}search/${encodeURIComponent(key)}/1.html`;
+    } else {
+        url = `${BASE_URL}search/${encodeURIComponent(key)}_${page}.html`;
+    }
+
     let response = fetch(url);
 
     if (!response.ok) return null;
@@ -14,13 +21,16 @@ function execute(key, page) {
     let doc = response.html();
 
     let books = [];
-    doc.select(".bookbox").forEach(book => {
-        let link = book.select(".bookname a").attr("href");
+    // Xử lý cả 2 loại selector
+    doc.select(".bookbox, .keywords .bookbox").forEach(book => {
+        let link = book.select(".bookname a").attr("href") ||
+            book.select("a.del_but").attr("href");
+
         if (link) {
             books.push({
-                name: book.select(".bookname").text(),
+                name: book.select(".bookname").text() || book.select("a[href^='/book/']").text(),
                 link: link,
-                description: book.select(".author .del_but").text().replace("作者：", ""),
+                description: book.select(".author").text() || book.select("a.del_but").text(),
                 cover: book.select("img").attr("src"),
                 host: BASE_URL
             });
@@ -30,7 +40,7 @@ function execute(key, page) {
     let next = "";
     let nextHref = doc.select(".next").first().attr("href");
     if (nextHref) {
-        let match = nextHref.match(/_(\d+)\.html/);
+        let match = nextHref.match(/[_-](\d+)\.html/);
         if (match) next = match[1];
     }
 

@@ -1,8 +1,11 @@
 load("config.js");
 
 function execute(url) {
-    if (!url.includes('uukanshu.cc')) {
-        url = BASE_URL + 'book/' + url.replace(/^\//, '');
+    if (!url.startsWith('http')) {
+        url = BASE_URL + 'book/' + url.replace(/^\//, '').replace(/\/$/, '');
+    }
+    if (!url.endsWith('/')) {
+        url = url + '/';
     }
 
     let response = fetch(url);
@@ -17,7 +20,7 @@ function execute(url) {
         if (chapterUrl) {
             data.push({
                 name: e.select("a").text(),
-                url: chapterUrl.includes('uukanshu.cc') ? chapterUrl : BASE_URL + chapterUrl.replace(/^\//, '')
+                url: chapterUrl.startsWith('http') ? chapterUrl : BASE_URL + chapterUrl.replace(/^\//, '')
             });
         }
     });
