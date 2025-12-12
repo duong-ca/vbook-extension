@@ -1,0 +1,19 @@
+{
+    "metadata": {
+        "author": "duong-ca",
+        "description": ""
+    },
+    "data": [
+        {
+            "name": "uukanshu",
+            "author": "duong-ca",
+            "path": "https://raw.githubusercontent.com/duong-ca/vbook-extension/main/uukscc/plugin.zip",
+            "version": 0,
+            "source": "https://uukanshu.cc/",
+            "icon": "https://raw.githubusercontent.com/duong-ca/vbook-extension/main/uukscc/icon.png",
+            "description": "Đọc truyện trên trang https://uukanshu.cc/",
+            "type": "chinese_novel",
+            "locale": "zh_CN"
+        }
+    ]
+}
