@@ -1,7 +1,14 @@
 load("config.js");
 
 function execute(url) {
-    let doc = fetch(url).html();
+    if (!url.includes('uukanshu.cc')) {
+        url = BASE_URL + 'book/' + url.replace(/^\//, '');
+    }
+
+    let response = fetch(url);
+    if (!response.ok) return null;
+
+    let doc = response.html();
 
     let booktag = doc.select(".booktag span");
     let tag = doc.select(".booktag a").text();
@@ -21,7 +28,7 @@ function execute(url) {
         host: BASE_URL,
         suggests: [{
             title: "Cùng tác giả",
-            input: "/modules/article/authorarticle.php?author=" + authors,
+            input: "/modules/article/authorarticle.php?author=" + encodeURIComponent(authors),
             script: "gen.js"
         }],
         ongoing: doc.select(".booktag").text().includes("連載")

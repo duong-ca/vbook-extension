@@ -3,21 +3,36 @@ load("config.js");
 function execute(url, page) {
     page = page || '1';
 
-    let pageUrl = url.includes('_')
-        ? url.replace(/_(\d+)\.html/, `_${page}.html`)
-        : `${url}_${page}.html`;
+    let pageUrl;
+    if (url.includes('_')) {
+        pageUrl = url.replace(/_(\d+)\.html/, `_${page}.html`);
+    } else if (url.endsWith('/')) {
+        pageUrl = `${url}${page}.html`;
+    } else {
+        pageUrl = `${url}_${page}.html`;
+    }
 
-    let doc = fetch(pageUrl).html();
+    if (!pageUrl.includes('uukanshu.cc')) {
+        pageUrl = BASE_URL + pageUrl;
+    }
+
+    let response = fetch(pageUrl);
+    if (!response.ok) return null;
+
+    let doc = response.html();
 
     let books = [];
     doc.select(".bookbox").forEach(book => {
-        books.push({
-            name: book.select(".bookname").text(),
-            link: book.select(".bookname a").attr("href"),
-            description: book.select(".author .del_but").text().replace("作者：", ""),
-            cover: book.select("img").attr("src"),
-            host: BASE_URL
-        });
+        let link = book.select(".bookname a").attr("href");
+        if (link) {
+            books.push({
+                name: book.select(".bookname").text(),
+                link: link,
+                description: book.select(".author .del_but").text().replace("作者：", ""),
+                cover: book.select("img").attr("src"),
+                host: BASE_URL
+            });
+        }
     });
 
     let next = "";

@@ -1,15 +1,25 @@
 load("config.js");
 
 function execute(url) {
-    let doc = fetch(url).html();
+    if (!url.includes('uukanshu.cc')) {
+        url = BASE_URL + 'book/' + url.replace(/^\//, '');
+    }
+
+    let response = fetch(url);
+    if (!response.ok) return null;
+
+    let doc = response.html();
     let chapters = doc.select("#list-chapterAll dd");
     let data = [];
 
     chapters.forEach(e => {
-        data.push({
-            name: e.select("a").text(),
-            url: e.select("a").attr("href")
-        });
+        let chapterUrl = e.select("a").attr("href");
+        if (chapterUrl) {
+            data.push({
+                name: e.select("a").text(),
+                url: chapterUrl.includes('uukanshu.cc') ? chapterUrl : BASE_URL + chapterUrl.replace(/^\//, '')
+            });
+        }
     });
 
     return Response.success(data);
