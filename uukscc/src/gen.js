@@ -1,32 +1,49 @@
-load('config.js');
+load("config.js");
 
 function execute(url, page) {
     page = page || '1';
 
-    if (page !== '1') {
-        url = url.replace(/_(\d+)\.html/, `_${page}.html`);
+    let pageUrl;
+
+    if (url.includes('_')) {
+        pageUrl = url.replace(/_(\d+)\.html/, `_${page}.html`);
+    } else if (url.endsWith('/')) {
+        pageUrl = `${url}${page}.html`;
+    } else {
+        pageUrl = `${url}_${page}.html`;
     }
 
-    let response = fetch(url);
+    if (!pageUrl.startsWith('http')) {
+        pageUrl = BASE_URL + pageUrl.replace(/^\//, '');
+    }
+
+    let response = fetch(pageUrl);
     if (!response.ok) return null;
 
     let doc = response.html();
-    let novels = [];
 
-    doc.select(".bookbox").forEach(e => {
-        novels.push({
-            name: e.select(".bookname a").text(),
-            link: e.select(".bookname a").attr("href"),
-            description: e.select(".update").text().replace("簡介：", "").trim(),
-            host: BASE_URL
-        });
+    let books = [];
+    doc.select(".bookbox").forEach(book => {
+        let link = book.select(".bookname a").attr("href") ||
+            book.select("a.del_but").attr("href");
+
+        if (link) {
+            books.push({
+                name: book.select(".bookname").text(),
+                link: link,
+                description: book.select(".author").text() || "Không có mô tả",
+                cover: book.select("img").attr("src"),
+                host: BASE_URL
+            });
+        }
     });
 
     let next = "";
-    let pageLink = doc.select(".next").first();
-    if (pageLink && pageLink.attr("href") && pageLink.attr("href").includes(`_${parseInt(page) + 1}.html`)) {
-        next = (parseInt(page) + 1).toString();
+    let nextHref = doc.select(".next").first().attr("href");
+    if (nextHref) {
+        let match = nextHref.match(/[_-](\d+)\.html/);
+        if (match) next = match[1];
     }
 
-    return Response.success(novels, next);
+    return Response.success(books, next);
 }
