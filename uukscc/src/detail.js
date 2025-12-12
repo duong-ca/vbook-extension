@@ -1,28 +1,29 @@
 load("config.js");
 
 function execute(url) {
-    if (!url.includes('uukanshu.cc')) {
-        if (url.startsWith('/')) {
-            url = BASE_URL + url.substring(1);
-        } else {
-            url = BASE_URL + url;
-        }
-    }
+    let doc = fetch(url).html();
 
-    let response = fetch(url);
-    if (!response.ok) return null;
+    let booktag = doc.select(".booktag span");
+    let tag = doc.select(".booktag a").text();
 
-    let doc = response.html();
+    booktag.forEach(e => {
+        tag += "<br>" + e.text();
+    });
+
+    let authors = doc.select(".booktag a.red").first().text().replace("作者：", "");
 
     return Response.success({
-        name: doc.select("h1.booktitle").text() || doc.select(".bookinfo h1").text(),
-        cover: doc.select(".bookcover img").attr("src") ||
-            doc.select(".book img.thumbnail").attr("src"),
-        author: doc.select(".booktag > a.red").text().replace("作者：", "") ||
-            doc.select(".booktag a[href*='author']").text(),
-        description: doc.select(".bookintro").text().trim() ||
-            doc.select(".bookinfo .bookintro").text().trim(),
-        detail: doc.select(".booktag").text().replace(/\s+/g, " ").trim(),
-        host: BASE_URL
+        name: doc.select("h1.booktitle").text(),
+        cover: doc.select(".thumbnail").first().attr("src"),
+        author: authors,
+        description: doc.select(".bookintro").text(),
+        detail: tag + "<br>" + doc.select(".booktime").text(),
+        host: BASE_URL,
+        suggests: [{
+            title: "Cùng tác giả",
+            input: "/modules/article/authorarticle.php?author=" + authors,
+            script: "gen.js"
+        }],
+        ongoing: doc.select(".booktag").text().includes("連載")
     });
 }

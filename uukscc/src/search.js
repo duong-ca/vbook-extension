@@ -1,31 +1,28 @@
 load("config.js");
 
 function execute(key, page) {
-    if (!page) page = '1';
+    page = page || '1';
 
-    let url = BASE_URL + "search/" + encodeURIComponent(key) + "_" + page + ".html";
-    let response = fetch(url);
+    let url = `${BASE_URL}search/${encodeURIComponent(key)}_${page}.html`;
+    let doc = fetch(url).html();
 
-    if (!response.ok) return null;
-
-    let doc = response.html();
-    let novelList = [];
-
-    doc.select(".bookbox").forEach(e => {
-        novelList.push({
-            name: e.select(".bookname a").text(),
-            link: e.select(".bookname a").attr("href"),
-            description: e.select(".author").first()?.text() || "",
+    let books = [];
+    doc.select(".bookbox").forEach(book => {
+        books.push({
+            name: book.select(".bookname").text(),
+            link: book.select(".bookname a").attr("href"),
+            description: book.select(".author .del_but").text().replace("作者：", ""),
+            cover: book.select("img").attr("src"),
             host: BASE_URL
         });
     });
 
     let next = "";
-    let nextBtn = doc.select(".next").first();
-    if (nextBtn && nextBtn.attr("href")) {
-        let match = nextBtn.attr("href").match(/_(\d+)\.html/);
+    let nextHref = doc.select(".next").first().attr("href");
+    if (nextHref) {
+        let match = nextHref.match(/_(\d+)\.html/);
         if (match) next = match[1];
     }
 
-    return Response.success(novelList, next);
+    return Response.success(books, next);
 }
