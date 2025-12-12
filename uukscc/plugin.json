@@ -1,0 +1,20 @@
+{
+    "metadata": {
+        "name": "uukanshu",
+        "author": "duong-ca",
+        "version": 0,
+        "source": "https://uukanshu.cc/",
+        "regexp": "(www.)?(uukanshu.cc)/(book)/\\d+/",
+        "description": "Đọc truyện trên trang https://uukanshu.cc/",
+        "locale": "zh_CN",
+        "language": "javascript",
+        "type": "chinese_novel"
+    },
+    "script": {
+        "home": "home.js",
+        "genre": "genre.js",
+        "search": "search.js",
+        "detail": "detail.js",
+        "chap": "chap.js"
+    }
+}
