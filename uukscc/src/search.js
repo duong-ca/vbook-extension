@@ -3,10 +3,8 @@ load("config.js");
 function execute(key, page) {
     page = page || '1';
 
-    // Xử lý key rỗng
     if (!key || key.trim() === '') return null;
 
-    // Xây dựng URL tìm kiếm đúng định dạng
     let url;
     if (page === '1') {
         url = `${BASE_URL}search/${encodeURIComponent(key)}/1.html`;
@@ -21,7 +19,6 @@ function execute(key, page) {
     let doc = response.html();
 
     let books = [];
-    // Xử lý cả 2 loại selector
     doc.select(".bookbox, .keywords .bookbox").forEach(book => {
         let link = book.select(".bookname a").attr("href") ||
             book.select("a.del_but").attr("href");
